@@ -6,6 +6,7 @@ from discord import Embed
 from discord.ext import commands
 from discord_slash import cog_ext, SlashContext
 
+
 class LastFm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -62,30 +63,36 @@ class LastFm(commands.Cog):
                 album_name = track_info['album']['#text']
             except KeyError:
                 await ctx.send(content="💢 Something went wrong with last.fm's reponse.", hidden=True)
-            
+            # fix any empty results
+            track_name = track_name if len(track_name) > 0 else "*(unknown track)*"
+            artist_name = artist_name if len(artist_name) > 0 else "*(unknown artist)*"
+            album_name = album_name if len(album_name) > 0 else "*(unknown album)*"
+            # check if the user is listening now
             now_playing = "@attr" in track_info.keys()
             title = f"🎶 Now playing for {username}" if now_playing else f"🎶 Last played for {username}"
+            # build embed
             embed = Embed(
-                title=title, url=track_info['url']
-                ).set_thumbnail(
-                    url=track_info['image'][1]['#text']
-                ).set_author(
-                    name=username,
-                    url=url,
-                    icon_url=img
-                ).add_field(
-                    name="Track",
-                    value=track_name,
-                    inline=True
-                ).add_field(
-                    name="Artist",
-                    value=artist_name,
-                    inline=True
-                ).add_field(
-                    name="Album",
-                    value=album_name,
-                    inline=True
-                )
+                title=title,
+                url=track_info['url']
+            ).set_thumbnail(
+                url=track_info['image'][1]['#text']
+            ).set_author(
+                name=username,
+                url=url,
+                icon_url=img
+            ).add_field(
+                name="Track",
+                value=track_name,
+                inline=True
+            ).add_field(
+                name="Artist",
+                value=artist_name,
+                inline=True
+            ).add_field(
+                name="Album",
+                value=album_name,
+                inline=True
+            )
             await ctx.send(embed=embed)
         except KeyError:
             await ctx.send(content="💢 Your last.fm isn't linked.", hidden=True)
@@ -94,6 +101,7 @@ class LastFm(commands.Cog):
         # save data to disk
         with open('db/lastfm.pickle', 'wb') as f:
             pickle.dump(self.data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(LastFm(bot))
