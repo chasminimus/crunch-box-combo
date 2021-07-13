@@ -1,13 +1,15 @@
-from discord import Intents, Embed, colour
-from discord.ext import commands
-from discord.ext.commands.errors import ExtensionFailed, ExtensionNotFound, ExtensionNotLoaded
-from discord.user import User
-from discord_slash import SlashCommand, SlashContext
-from discord_slash.model import SlashCommandOptionType, SlashCommandPermissionType
 import json
 import traceback
+from typing import List
 
-from discord_slash.utils.manage_commands import create_option, create_permission
+from discord import Embed, Intents
+from discord.ext import commands
+from discord.ext.commands.errors import ExtensionNotFound
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.model import (SlashCommandOptionType,
+                                 SlashCommandPermissionType)
+from discord_slash.utils.manage_commands import (create_option,
+                                                 create_permission)
 
 config = None
 with open("config.json") as config_file:
@@ -16,15 +18,18 @@ with open("config.json") as config_file:
 CRUNCHY_RED = 0xE3265A
 CRUNCHY_BLUE = 0x28A9AB
 INVITE_LINK = r"https://discord.com/api/oauth2/authorize?client_id=820865262526005258&permissions=4294307568&scope=applications.commands%20bot"
-OWNER_ID = config['owner_id']
-GUILDS = config['guild_whitelist']
+OWNER_ID: int = config['owner_id']
+GUILDS: List[int] = config['guild_whitelist']
+BOT_TOKEN: str = config['api_keys']['bot_token']
 PERMS_OWNER_ONLY = {
-                 guild: create_permission(
-                     id=OWNER_ID,
-                     id_type=SlashCommandPermissionType.USER,
-                     permission=True)
-                 for guild in GUILDS
-             }
+    guild_id: [
+        create_permission(
+            id=OWNER_ID,
+            id_type=SlashCommandPermissionType.USER,
+            permission=True)
+    ]
+    for guild_id in GUILDS
+}
 
 bot = commands.Bot(intents=Intents.default(),
                    command_prefix="surely no one will use this as a command prefix",
@@ -35,9 +40,11 @@ slash = SlashCommand(bot, sync_commands=True)
 # inject? the config into the bot so cogs can use it
 bot.config = config
 
+
 @bot.event
 async def on_ready():
     print("~crunchy time~")
+
 
 @slash.slash(name="load",
              description="(Re)load any number of extensions.",
@@ -93,6 +100,7 @@ async def load(ctx: SlashContext, extensions: str = None):
             response += "```" + exceptions[failed_ext_name] + "```"
     await ctx.send(content=response, hidden=True)
 
+
 @slash.slash(name="info", description="Get pertinent bot info.", guild_ids=GUILDS)
 async def info(ctx: SlashContext):
     appinfo = await bot.application_info()
@@ -112,10 +120,9 @@ async def info(ctx: SlashContext):
     await ctx.send(embed=embed, hidden=True)
 
 # run run run run run
-exts = ['ext.stuff']
+exts = ['ext.stuff', 'ext.annotate']
 
 if __name__ == '__main__':
     for ext in exts:
         bot.load_extension(ext)
-
-bot.run(config['api_keys']['bot_token'])
+    bot.run(config['api_keys']['bot_token'])
