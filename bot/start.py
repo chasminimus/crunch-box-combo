@@ -1,0 +1,121 @@
+from discord import Intents, Embed, colour
+from discord.ext import commands
+from discord.ext.commands.errors import ExtensionFailed, ExtensionNotFound, ExtensionNotLoaded
+from discord.user import User
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.model import SlashCommandOptionType, SlashCommandPermissionType
+import json
+import traceback
+
+from discord_slash.utils.manage_commands import create_option, create_permission
+
+config = None
+with open("config.json") as config_file:
+    config = json.load(config_file)
+
+CRUNCHY_RED = 0xE3265A
+CRUNCHY_BLUE = 0x28A9AB
+INVITE_LINK = r"https://discord.com/api/oauth2/authorize?client_id=820865262526005258&permissions=4294307568&scope=applications.commands%20bot"
+OWNER_ID = config['owner_id']
+GUILDS = config['guild_whitelist']
+PERMS_OWNER_ONLY = {
+                 guild: create_permission(
+                     id=OWNER_ID,
+                     id_type=SlashCommandPermissionType.USER,
+                     permission=True)
+                 for guild in GUILDS
+             }
+
+bot = commands.Bot(intents=Intents.default(),
+                   command_prefix="surely no one will use this as a command prefix",
+                   help_command=None,
+                   owner_id=config['owner_id'])
+slash = SlashCommand(bot, sync_commands=True)
+
+# inject? the config into the bot so cogs can use it
+bot.config = config
+
+@bot.event
+async def on_ready():
+    print("~crunchy time~")
+
+@slash.slash(name="load",
+             description="(Re)load any number of extensions.",
+             options=[
+                 create_option(
+                     name="extensions",
+                     description="A list of one or more extensions.",
+                     option_type=SlashCommandOptionType.STRING,
+                     required=False
+                 )
+             ],
+             default_permission=False,
+             permissions=PERMS_OWNER_ONLY,
+             guild_ids=GUILDS)
+async def load(ctx: SlashContext, extensions: str = None):
+    reloaded = {'success': [], 'failure': []}
+    exceptions = {}
+    # if no option is provided, reload every loaded extension
+    reloading_all = not extensions
+    if reloading_all:
+        print("Reloading all.")
+    working_set = extensions.split() if not reloading_all else list(bot.extensions.keys())
+    # (re)load and collect successes/failures
+    for ext in working_set:
+        # if we're reloading everything or the extension is already loaded
+        if ext in bot.extensions or reloading_all:
+            try:
+                bot.reload_extension(ext)
+                reloaded["success"].append(ext)
+            except Exception:
+                reloaded["failure"].append(ext)
+                exceptions[ext] = traceback.format_exc()
+        # otherwise load it
+        else:
+            try:
+                bot.load_extension(ext)
+                reloaded["success"].append(ext)
+            except ExtensionNotFound:
+                reloaded["failure"].append(ext)
+                exceptions[ext] = f"{ext} isn't a known extension."
+            except Exception:
+                reloaded["failure"].append(ext)
+                exceptions[ext] = traceback.format_exc()
+    # format response
+    response = ""
+    successes: str = ', '.join(['`' + x + '`' for x in reloaded['success']])
+    if len(reloaded['success']) > 0:
+        response += f"⚗ (Re)loaded {len(reloaded['success'])} modules ({successes})"
+    if len(reloaded['failure']) > 0:
+        failures: str = ', '.join(['`' + x + '`' for x in reloaded['failure']])
+        response += f"\n💢 Failed to (re)load {len(reloaded['failure'])} modules ({failures}) with these errors:\n"
+        for failed_ext_name in reloaded['failure']:
+            response += "```" + exceptions[failed_ext_name] + "```"
+    await ctx.send(content=response, hidden=True)
+
+@slash.slash(name="info", description="Get pertinent bot info.", guild_ids=GUILDS)
+async def info(ctx: SlashContext):
+    appinfo = await bot.application_info()
+    owner = appinfo.owner
+    embed = Embed(
+        title="crunch crunch crunch",
+        colour=CRUNCHY_BLUE,
+        description=f"do a crunch box combo and [invite]({INVITE_LINK}) me"
+    ).set_author(
+        name="crunch box combo",
+    ).set_thumbnail(
+        url=str(appinfo.icon_url)
+    ).set_footer(
+        text=f"by @{owner.name}#{owner.discriminator}",
+        icon_url=str(owner.avatar_url)
+    )
+    await ctx.send(embed=embed, hidden=True)
+
+# run run run run run
+exts = ['ext.stuff']
+
+if __name__ == '__main__':
+    for ext in exts:
+        bot.load_extension(ext)
+
+bot.run(config['api_keys']['bot_token'])

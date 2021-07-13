@@ -1,0 +1,11 @@
+{
+    "guild_whitelist": [
+        12345678
+    ],
+    "owner_id": 0,
+    "api_keys": {
+        "lastfm": "last fm api key goes here",
+        "self": "your own private api key for communicating to flask goes here",
+        "bot_token": "your discord bot token goes here"
+    }
+}
