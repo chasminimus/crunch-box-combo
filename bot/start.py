@@ -1,6 +1,6 @@
 import json
 import traceback
-from typing import List
+from typing import List, Dict
 
 from discord import Embed, Intents
 from discord.ext import commands
@@ -11,9 +11,12 @@ from discord_slash.model import (SlashCommandOptionType,
 from discord_slash.utils.manage_commands import (create_option,
                                                  create_permission)
 
-config = None
-with open("config.json") as config_file:
-    config = json.load(config_file)
+def load_config() -> Dict:
+    with open("config.json") as config_file:
+        config = json.load(config_file)
+    return config
+
+config = load_config()
 
 CRUNCHY_RED = 0xE3265A
 CRUNCHY_BLUE = 0x28A9AB
