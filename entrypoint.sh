@@ -21,7 +21,7 @@ tmux -u new-session -d -s session
 
 # use send-keys so the pane doesn't close when the program is stopped
 tmux -u rename-window 'app'
-tmux -u send-keys -t '=session:=app' 'source env/bin/activate; python3 ./bot/start.py' Enter
+tmux -u send-keys -t '=session:=app' 'source .venv/bin/activate; python3 ./bot/start.py' Enter
 
 export FLASK_ENV="development"
 tmux -u split-window -h -t '=session:=app' -c web/backend
