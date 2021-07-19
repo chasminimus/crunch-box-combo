@@ -8,9 +8,10 @@ from discord_slash import cog_ext, SlashContext
 
 
 class LastFm(commands.Cog):
+    key = None
     def __init__(self, bot):
         self.bot = bot
-        self.key = bot.config['api_keys']['lastfm']
+        LastFm.key = bot.config['api_keys']['lastfm']
         try:
             with open('db/lastfm.pickle', 'rb') as f:
                 self.data = pickle.load(f)
@@ -30,7 +31,7 @@ class LastFm(commands.Cog):
     async def lastfm_link(self, ctx: SlashContext, username: str):
         # make a request to lastfm's API to see if the user really exists
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://ws.audioscrobbler.com/2.0/?method=user.getinfo&user={username}&api_key={self.key}&format=json") as response:
+            async with session.get(f"https://ws.audioscrobbler.com/2.0/?method=user.getinfo&user={username}&api_key={LastFm.key}&format=json") as response:
                 userdata = await response.json()
         try:
             name, url, img = userdata['user']['name'], userdata['user']['url'], userdata['user']['image'][0]['#text']
@@ -48,7 +49,7 @@ class LastFm(commands.Cog):
             (username, url, img) = self.data[ctx.author_id]
             # make a request to lastfm for the playback info
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={username}&api_key={self.key}&extended=1&limit=1&format=json") as response:
+                async with session.get(f"https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={username}&api_key={LastFm.key}&extended=1&limit=1&format=json") as response:
                     userdata = await response.json()
 
             # set defaults

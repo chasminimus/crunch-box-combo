@@ -17,9 +17,10 @@ MESSAGE_LINK_PATTERN = r"http(?:s)?://(?:canary.)?discord.com/channels/(\d+)/(\d
 TWITTER_LINK_PATTERN = r"http(?:s)://twitter.com/.*/(\d*)"
 
 class Annotate(commands.Cog):
+    bearer_token = None
     def __init__(self, bot):
         self.bot: commands.Bot = bot
-        self.twitter_bearer_key = bot.config['api_keys']['twitter_bearer']
+        Annotate.bearer_token = bot.config['api_keys']['twitter_bearer']
 
     @commands.Cog.listener()
     async def on_message(self, msg: Message):
@@ -68,9 +69,9 @@ class Annotate(commands.Cog):
         # matches will have the captured tweet ID from the link
         for match in matches:
             tweet_id = match
-            bearer_token = self.bot.config['api_keys']['twitter_bearer']
+            
             # make a request to the twitter API to get some data
-            headers = {"Authorization" : f"Bearer {bearer_token}"}
+            headers = {"Authorization" : f"Bearer {Annotate.bearer_token}"}
             params = {
                 "ids": tweet_id,
                 "tweet.fields": "attachments,referenced_tweets",

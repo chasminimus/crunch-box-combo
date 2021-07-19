@@ -11,16 +11,12 @@ from discord_slash.model import (SlashCommandOptionType,
 from discord_slash.utils.manage_commands import (create_option,
                                                  create_permission)
 
-def load_config() -> Dict:
-    with open("config.json") as config_file:
-        config = json.load(config_file)
-    return config
+import util
 
-config = load_config()
 
-CRUNCHY_RED = 0xE3265A
-CRUNCHY_BLUE = 0x28A9AB
-INVITE_LINK = r"https://discord.com/api/oauth2/authorize?client_id=820865262526005258&permissions=4294307568&scope=applications.commands%20bot"
+config = util.load_config()
+
+
 OWNER_ID: int = config['owner_id']
 GUILDS: List[int] = config['guild_whitelist']
 BOT_TOKEN: str = config['api_keys']['bot_token']
@@ -40,7 +36,7 @@ bot = commands.Bot(intents=Intents.default(),
                    owner_id=config['owner_id'])
 slash = SlashCommand(bot, sync_commands=True)
 
-# inject? the config into the bot so cogs can use it
+# store? the config in the bot so cogs can use it
 bot.config = config
 
 
@@ -110,8 +106,8 @@ async def info(ctx: SlashContext):
     owner = appinfo.owner
     embed = Embed(
         title="crunch crunch crunch",
-        colour=CRUNCHY_BLUE,
-        description=f"do a crunch box combo and [invite]({INVITE_LINK}) me"
+        colour=util.CRUNCHY_BLUE,
+        description=f"do a crunch box combo and [invite]({util.INVITE_LINK}) me"
     ).set_author(
         name="crunch box combo",
     ).set_thumbnail(
