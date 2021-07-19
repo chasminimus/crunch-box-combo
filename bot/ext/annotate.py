@@ -80,10 +80,10 @@ class Annotate(commands.Cog):
             async with aiohttp.ClientSession() as session:
                 async with session.get('https://api.twitter.com/2/tweets', params=params, headers=headers) as response:
                     tweet_data = await response.json()
-            # expand quoted tweet - fetches the link for a quoted tweet and posts it if the post ended with ~expand
+            # expand quoted tweet - fetches the link for a quoted tweet and posts it
             try:
                 last_token: str = msg.content.split()[-1]
-                if last_token == "~expand":
+                if last_token != "~noexpand":
                     # get quoted id
                     referenced_tweets: List[Dict[str, str]] = tweet_data['data'][0]['referenced_tweets']
                     for tweet in referenced_tweets:
@@ -112,19 +112,6 @@ class Annotate(commands.Cog):
                     await msg.add_reaction("⏯")
             except KeyError:
                 pass
-
-
-    async def _post_quoted_twt(self, msg: Message):
-        """Looks for a quoted tweet in a message and posts it if the original post
-        is tagged "~expand".
-
-        Args:
-            msg (Message): The message to scan.
-        """
-        # only post a quoted tweet if the ~expand tag is at the end of the message
-        last_token: str = msg.content.split()[-1]
-        if last_token != "~expand":
-            return
         
 
 
