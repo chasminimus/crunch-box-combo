@@ -30,7 +30,10 @@ PERMS_OWNER_ONLY = {
     for guild_id in GUILDS
 }
 
-bot = commands.Bot(intents=Intents.default(),
+intents: Intents = Intents.default()
+intents.members = True
+
+bot = commands.Bot(intents=intents,
                    command_prefix="surely no one will use this as a command prefix",
                    help_command=None,
                    owner_id=config['owner_id'])
@@ -119,7 +122,7 @@ async def info(ctx: SlashContext):
     await ctx.send(embed=embed, hidden=True)
 
 # run run run run run
-exts = ['ext.stuff', 'ext.annotate']
+exts = ['ext.stuff', 'ext.annotate', 'ext.automata']
 
 if __name__ == '__main__':
     for ext in exts:
