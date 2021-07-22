@@ -91,16 +91,13 @@ class Annotate(commands.Cog):
             # expand quoted tweet - fetches the link for a quoted tweet and posts it
             try:
                 # get quoted id
-                referenced_tweets: List[Dict[str, str]
-                                        ] = tweet_data['data'][0]['referenced_tweets']
+                referenced_tweets: List[Dict[str, str]] = tweet_data['data'][0]['referenced_tweets']
                 for tweet in referenced_tweets:
                     if tweet['type'] == 'quoted':
                         quoted_id = tweet['id']
-                referenced_users: List[Dict[str, str]
-                                       ] = tweet_data['includes']['users']
+                referenced_users: List[Dict[str, str]] = tweet_data['includes']['users']
                 # get the quoted's author's id
-                included_tweets: List[Dict[str, str]
-                                      ] = tweet_data['includes']['tweets']
+                included_tweets: List[Dict[str, str]] = tweet_data['includes']['tweets']
                 for tweet in included_tweets:
                     if tweet['id'] == quoted_id:
                         author_id = tweet['author_id']
@@ -113,8 +110,7 @@ class Annotate(commands.Cog):
                 pass
             # annotate media - reacts to a tweet link with the number of images / whether it's a video
             try:
-                tweet_media: List[Dict[str, str]
-                                  ] = tweet_data['includes']['media']
+                tweet_media: List[Dict[str, str]] = tweet_data['includes']['media']
                 media_count = len(tweet_media)
                 if media_count > 1:
                     await msg.add_reaction(["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣"][media_count])
