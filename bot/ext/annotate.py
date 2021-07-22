@@ -18,8 +18,10 @@ MESSAGE_LINK_PATTERN = r"http(?:s)?://(?:canary.)?discord.com/channels/(\d+)/(\d
 # matches a twitter link and captures the ID from it
 TWITTER_LINK_PATTERN = r"http(?:s)://twitter.com/.*/(\d*)"
 
+
 class Annotate(commands.Cog):
     bearer_token = None
+
     def __init__(self, bot):
         print(u"📝 Annotate")
         self.bot: commands.Bot = bot
@@ -27,17 +29,18 @@ class Annotate(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg: Message):
-        last_token: str = msg.content.split()[-1]
-        if last_token != "~noexpand":
-            await self._post_linked_msg(msg)
-            await self._annotate_tweet(msg)
+        if msg.content:
+            last_token: str = msg.content.split()[-1]
+            if last_token != "~noexpand":
+                await self._post_linked_msg(msg)
+                await self._annotate_tweet(msg)
 
     async def _post_linked_msg(self, msg: Message):
         """Scans a message for Discord message links and posts the linked messages' contents.
 
         Args:
             msg (Message): The message to scan.
-        """        
+        """
         this_guild: Guild = msg.guild
         matches = re.findall(MESSAGE_LINK_PATTERN, msg.content, re.IGNORECASE)
         embeds = []
@@ -75,7 +78,7 @@ class Annotate(commands.Cog):
         for match in matches:
             tweet_id = match
             # make a request to the twitter API to get some data
-            headers = {"Authorization" : f"Bearer {Annotate.bearer_token}"}
+            headers = {"Authorization": f"Bearer {Annotate.bearer_token}"}
             params = {
                 "ids": tweet_id,
                 "tweet.fields": "attachments,referenced_tweets",
@@ -88,13 +91,16 @@ class Annotate(commands.Cog):
             # expand quoted tweet - fetches the link for a quoted tweet and posts it
             try:
                 # get quoted id
-                referenced_tweets: List[Dict[str, str]] = tweet_data['data'][0]['referenced_tweets']
+                referenced_tweets: List[Dict[str, str]
+                                        ] = tweet_data['data'][0]['referenced_tweets']
                 for tweet in referenced_tweets:
                     if tweet['type'] == 'quoted':
                         quoted_id = tweet['id']
-                referenced_users: List[Dict[str, str]] = tweet_data['includes']['users']
+                referenced_users: List[Dict[str, str]
+                                       ] = tweet_data['includes']['users']
                 # get the quoted's author's id
-                included_tweets: List[Dict[str, str]] = tweet_data['includes']['tweets']
+                included_tweets: List[Dict[str, str]
+                                      ] = tweet_data['includes']['tweets']
                 for tweet in included_tweets:
                     if tweet['id'] == quoted_id:
                         author_id = tweet['author_id']
@@ -107,16 +113,15 @@ class Annotate(commands.Cog):
                 pass
             # annotate media - reacts to a tweet link with the number of images / whether it's a video
             try:
-                tweet_media: List[Dict[str, str]] = tweet_data['includes']['media']
+                tweet_media: List[Dict[str, str]
+                                  ] = tweet_data['includes']['media']
                 media_count = len(tweet_media)
                 if media_count > 1:
-                    await msg.add_reaction(["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣"][media_count])
+                    await msg.add_reaction(["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣"][media_count])
                 if tweet_media[0]['type'] == 'video':
                     await msg.add_reaction("⏯")
             except KeyError:
                 pass
-        
-
 
 
 def setup(bot: commands.Bot):

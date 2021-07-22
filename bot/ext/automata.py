@@ -7,12 +7,13 @@ from discord_slash import cog_ext
 
 from discord_slash.context import SlashContext
 
+
 class Automata(commands.Cog):
     """
     Automatic server tasks.
 
     ### Rolestore
-    
+
     Restores roles for rejoining users by storing them.
     The structure is a nested dictionary:
     - data {
@@ -43,7 +44,7 @@ class Automata(commands.Cog):
 
         Args:
             member (Member): The member that joined.
-        """        
+        """
         guildid: int = member.guild.id
         guilddata = self.data.get(guildid)
         if guilddata == None:
@@ -61,17 +62,16 @@ class Automata(commands.Cog):
                 roles.append(role)
             # print(f"Restoring roles {''.join([role.name for role in roles])} for {member.display_name} in {member.guild.name}")
             await member.add_roles(*roles, reason="💾 Rolestore restore.")
-                
 
     async def _rolestore_capture(self, member: Member):
         """Saves a member's roles when they exit the server.
 
         Args:
             member (Member): The member who left.
-        """        
+        """
         guildid: int = member.guild.id
         roleids = [role.id for role in member.roles]
-        try: 
+        try:
             self.data[guildid].update({member.id: roleids})
         except KeyError:
             self.data[guildid] = {member.id: roleids}
