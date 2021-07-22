@@ -87,7 +87,7 @@ class Core(commands.Cog):
         embed = Embed(
             title="crunch crunch crunch",
             colour=util.CRUNCHY_BLUE,
-            description=f"do a crunch box combo and [invite]({util.INVITE_LINK}) me"
+            description=f"""do a crunch box combo and [invite]({util.INVITE_LINK}) me"""
         ).set_author(
             name="crunch box combo",
         ).set_thumbnail(
@@ -95,6 +95,9 @@ class Core(commands.Cog):
         ).set_footer(
             text=f"by @{owner.name}#{owner.discriminator}",
             icon_url=str(owner.avatar_url)
+        ).add_field(
+            name="shut up",
+            value="react with any of ❌🤫🤐🚫🔕🔇 to delete one of my messages, append a ~noexpand to your message to inhibit automatic posting"
         )
         await ctx.send(embed=embed, hidden=True)
 
