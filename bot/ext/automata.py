@@ -28,6 +28,7 @@ class Automata(commands.Cog):
     """
 
     def __init__(self, bot: commands.Bot):
+        print("🤖 Automata")
         self.bot = bot
         self.data: Dict = {}
         try:

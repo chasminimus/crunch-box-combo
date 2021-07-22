@@ -6,12 +6,14 @@ from discord import Embed
 from discord.ext import commands
 from discord_slash import cog_ext, SlashContext
 
+import util
 
 class LastFm(commands.Cog):
     key = None
     def __init__(self, bot):
+        print("📻 LastFm")
         self.bot = bot
-        LastFm.key = bot.config['api_keys']['lastfm']
+        LastFm.key = util.CONFIG['api_keys']['lastfm']
         try:
             with open('db/lastfm.pickle', 'rb') as f:
                 self.data = pickle.load(f)

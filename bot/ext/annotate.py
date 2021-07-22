@@ -8,6 +8,8 @@ from discord import Guild
 import re
 import aiohttp
 
+import util
+
 # according to the re module documentation, compiled patterns are cached so we don't need
 # to compile this pattern as long as we don't use too many other regexes?
 
@@ -19,8 +21,9 @@ TWITTER_LINK_PATTERN = r"http(?:s)://twitter.com/.*/(\d*)"
 class Annotate(commands.Cog):
     bearer_token = None
     def __init__(self, bot):
+        print(u"📝 Annotate")
         self.bot: commands.Bot = bot
-        Annotate.bearer_token = bot.config['api_keys']['twitter_bearer']
+        Annotate.bearer_token = util.CONFIG['api_keys']['twitter_bearer']
 
     @commands.Cog.listener()
     async def on_message(self, msg: Message):
