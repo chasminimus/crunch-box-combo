@@ -1,7 +1,8 @@
 from discord.ext import commands
 import pickle
-from discord import Guild, Member, Role
-from typing import Dict, List
+from discord import Guild, Member, Role, User
+from typing import Dict, List, Union
+from discord.reaction import Reaction
 from discord_slash import cog_ext
 
 from discord_slash.context import SlashContext
@@ -84,6 +85,12 @@ class Automata(commands.Cog):
     @commands.Cog.listener()
     async def on_member_remove(self, member: Member):
         await self._rolestore_capture(member)
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction: Reaction, user: Union[User, Member]):
+        if reaction.message.author == self.bot.user:
+            if reaction.emoji in ["❌", "🤫", "🤐", "🚫", "🔕", "🔇"]:
+                await reaction.message.delete()
 
     def cog_unload(self):
         with open('db/rolestore.pickle', 'wb') as f:
