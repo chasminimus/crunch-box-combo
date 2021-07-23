@@ -9,11 +9,10 @@ from discord_slash import cog_ext, SlashContext
 import util
 
 class LastFm(commands.Cog):
-    key = None
+    key = util.CONFIG['api_keys']['lastfm']
     def __init__(self, bot):
         print("📻 LastFm")
         self.bot = bot
-        LastFm.key = util.CONFIG['api_keys']['lastfm']
         try:
             with open('db/lastfm.pickle', 'rb') as f:
                 self.data = pickle.load(f)

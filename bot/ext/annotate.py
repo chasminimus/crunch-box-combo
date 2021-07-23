@@ -20,12 +20,11 @@ TWITTER_LINK_PATTERN = r"http(?:s)://twitter.com/.*/(\d*)"
 
 
 class Annotate(commands.Cog):
-    bearer_token = None
+    bearer_token = util.CONFIG['api_keys']['twitter_bearer']
 
     def __init__(self, bot):
         print(u"📝 Annotate")
         self.bot: commands.Bot = bot
-        Annotate.bearer_token = util.CONFIG['api_keys']['twitter_bearer']
 
     @commands.Cog.listener()
     async def on_message(self, msg: Message):

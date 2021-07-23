@@ -1,3 +1,4 @@
+from bot.ext.ossuary import OSSUARY_LINK
 import json
 from typing import Dict, List
 from discord_slash.model import SlashCommandPermissionType
@@ -26,3 +27,4 @@ PERMS_OWNER_ONLY = {
 CRUNCHY_RED = 0xE3265A
 CRUNCHY_BLUE = 0x28A9AB
 INVITE_LINK = r"https://discord.com/api/oauth2/authorize?client_id=820865262526005258&permissions=4294307568&scope=applications.commands%20bot"
+OSSUARY_LINK = "localhost:5000"
