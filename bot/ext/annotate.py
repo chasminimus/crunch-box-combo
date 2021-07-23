@@ -1,7 +1,6 @@
 from typing import Dict, List
-from discord.abc import Messageable
+from discord.channel import TextChannel
 from discord.embeds import Embed
-from discord.enums import try_enum
 from discord.ext import commands
 from discord.message import Message
 from discord import Guild
@@ -49,7 +48,11 @@ class Annotate(commands.Cog):
             guild_id, channel_id, message_id = tuple(map(int, match))
             # only fetch messages through links in the same guild, for basic privacy
             if guild_id == this_guild.id:
-                channel: Messageable = await self.bot.fetch_channel(channel_id)
+                channel = await self.bot.fetch_channel(channel_id)
+                # exclude nsfw embedding
+                if isinstance(channel, TextChannel):
+                    if not msg.channel.is_nsfw() and channel.is_nsfw() :
+                        continue
                 message: Message = await channel.fetch_message(message_id)
                 if len(message.content) > 0:
                     embed = Embed(
