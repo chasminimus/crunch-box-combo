@@ -2,5 +2,3 @@ __pycache__
 .venv
 db
 config.json
-node_modules/
-build/

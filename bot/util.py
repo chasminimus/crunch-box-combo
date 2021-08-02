@@ -1,4 +1,3 @@
-from bot.ext.ossuary import OSSUARY_LINK
 import json
 from typing import Dict, List
 from discord_slash.model import SlashCommandPermissionType
