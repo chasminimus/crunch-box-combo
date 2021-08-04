@@ -1,11 +1,15 @@
 {
-    "guild_whitelist": [
+    "guild_whitelist": [ // IDs of the guilds to register slash commands in if not global
         12345678
     ],
-    "owner_id": 0,
+    "owner_id": 12345678, // ID of the owner
+    "debug_channel": 12345678, // ID of the channel for posting errors/debug info 
     "api_keys": {
         "lastfm": "last fm api key goes here",
-        "self": "your own private api key for communicating to flask goes here",
-        "bot_token": "your discord bot token goes here"
+        "self": "your own private api key for communicating to your webserver goes here",
+        "bot_token": "your discord bot token goes here",
+        "twitter": "your twitter api key goes here",
+        "twitter_secret": "your twitter secret goes here",
+        "twitter_bearer": "your twitter bearer token goes here" // this is the only twitter key i actually used
     }
 }

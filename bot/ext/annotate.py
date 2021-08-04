@@ -51,7 +51,7 @@ class Annotate(commands.Cog):
                 channel = await self.bot.fetch_channel(channel_id)
                 # exclude nsfw embedding
                 if isinstance(channel, TextChannel):
-                    if not msg.channel.is_nsfw() and channel.is_nsfw() :
+                    if not msg.channel.is_nsfw() and channel.is_nsfw():
                         continue
                 message: Message = await channel.fetch_message(message_id)
                 if len(message.content) > 0:
@@ -62,8 +62,8 @@ class Annotate(commands.Cog):
                         url=message.jump_url,
                         icon_url=message.author.avatar_url
                     ).add_field(
-                        name="🔗",
-                        value=f"[original post]({message.jump_url})"
+                        name="original post",
+                        value=f"[link 🔗]({message.jump_url})"
                     )
                     embeds.append(embed)
         if len(embeds) > 0:
