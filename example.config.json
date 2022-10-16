@@ -10,6 +10,7 @@
         "bot_token": "your discord bot token goes here",
         "twitter": "your twitter api key goes here",
         "twitter_secret": "your twitter secret goes here",
-        "twitter_bearer": "your twitter bearer token goes here" // this is the only twitter key i actually used
+        "twitter_bearer": "your twitter bearer token goes here", // this is the only twitter key i actually used
+        "openai": "your openai token here"
     }
 }

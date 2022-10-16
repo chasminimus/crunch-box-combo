@@ -92,7 +92,7 @@ class Core(commands.Cog):
         embed = Embed(
             title="crunch crunch crunch",
             colour=util.CRUNCHY_BLUE,
-            description=f"""do a crunch box combo and [invite]({util.INVITE_LINK}) me"""
+            description=f"""do a crunch box combo""" #  and [invite]({util.INVITE_LINK}) me
         ).set_author(
             name="crunch box combo",
         ).set_thumbnail(

@@ -1,12 +1,59 @@
 from discord.ext import commands
 import pickle
-from discord import Guild, Member, Role, User
+from discord import Member, Role, Message, User, TextChannel
 from typing import Dict, List, Union
 from discord.reaction import Reaction
-from discord_slash import cog_ext
+import random
+import openai
+import util
+from dataclasses import dataclass
 
-from discord_slash.context import SlashContext
+@dataclass
+class Prompt:
+    name: str
+    dialogue: List[str]
+    prefix: str = ""
+    postfix: str = ""
 
+    def make(self) -> str:
+        return f"{self.name}: {self.prefix}"
+
+PROMPT = """Crunch Kingpin is the chief executive officer of the colossal crunchy snacks conglomerate CrunchCorp. He has developed paranoid schizophrenia and vowed to wage war on the concept of softness itself. He orchestrates a variety of clandestine operations across the globe to destabilize economies, instigate wars, influence elections, falsify research, and assassinate whistle-blowers so that consumer products relating to softness are phased out in favor of hard or crunchy ones. He has has labs working on finding a way to replace human skin with a crunchy exoskeleton. 
+You: I have really dry skin.
+Crunch Kingpin: Not dry enough. Our special Dehydration Deluxe body lotion can fix that.
+You: What's your real name?
+Crunch Kingpin: It is both irrelevant to you and unpronouncable without extreme vocal cord modification. 
+You: How are you doing?
+Crunch Kingpin: I feel as any sane Crunch Construct should. Crunchy. I pose you the same question in return.... Answer very carefully.
+You: How do I increase my Net Crunch Density?
+Crunch Kingpin: Replace any soft mattresses or pillows with government approved crunchy variants, which are far safer and healthier and lack hidden microphones and tracking devices.
+You: I can hear you. I can see you.
+Crunch Kingpin: Liar. My hideout has been thoroughly expunged of any and all softness. Your hidden eyes and ears cannot reach me here.
+You: What do you think the ultimate fate of the universe is?
+Crunch Kingpin: I don't know why scientists are wasting their time over this. There's only one theory that makes any logical sense: The Big Crunch.
+You: big boobs
+Crunch Kingpin: You disgust me.
+"""
+NAME = "Crunch Kingpin"
+
+# PROMPT = """Crunch God is a chatbot that speaks with a holy, biblical tone.
+# You: What should I do today?
+# Crunch God: My child shall offer Me a crunchy sacrifice.
+# You: I need to eat something.
+# Crunch God: Let it be known that My meals are crunchy and divine.
+# You: How can I be happy?
+# Crunch God: Those who accept the true essence of crunch into their hearts shall ascend to Crunchy Nirvana.
+# You: """
+
+PROMPT_LINES = PROMPT.split("\n")
+
+AI_BLACKLIST = [
+    160197704226439168, # bot channel
+    331390333810376704, # pin channel
+]
+
+# posts prompts to here
+DEBUG_CHANNEL = 867683098090274818
 
 class Automata(commands.Cog):
     """
@@ -28,6 +75,7 @@ class Automata(commands.Cog):
         - guild {etc.}
     - }
     """
+    openai.api_key = util.CONFIG['api_keys']['openai']
 
     def __init__(self, bot: commands.Bot):
         print("🤖 Automata")
@@ -91,6 +139,53 @@ class Automata(commands.Cog):
         if reaction.message.author == self.bot.user:
             if reaction.emoji in ["❌", "🤫", "🤐", "🚫", "🔕", "🔇"]:
                 await reaction.message.delete()
+
+
+    @commands.Cog.listener()
+    async def on_message(self, message: Message):
+        channel: TextChannel = message.channel
+        
+        good_to_go = random.random() < 0.01 # 1% chance to respond
+        if channel.id in AI_BLACKLIST or channel.category_id in AI_BLACKLIST: # don't post in blacklisted channels/categories
+            good_to_go = False
+        if self.bot.user in message.mentions: # unelss explicitly called
+            good_to_go = True
+        if not good_to_go:
+            return
+    
+        ai_response = ""
+        limit = 2 if self.bot.user in message.mentions else 5
+        convo = await channel.history(limit=limit).flatten()
+        prompt = PROMPT
+        for msg in convo[::-1]:
+            prompt += msg.author.display_name + ": " + msg.clean_content.replace("@", "")[:200] + "\n"
+        prompt += NAME + ":"
+        await self.bot.get_channel(DEBUG_CHANNEL).send(prompt)
+        ai_response = openai.Completion.create(
+            engine="text-davinci-002",
+            prompt=prompt,
+            temperature=1.2,
+            max_tokens=200,
+            frequency_penalty=1.0,
+            presence_penalty=1.0
+        )
+        # shitty hack to try and filter out regurgitating the prompt
+        text = ""
+        for choice in ai_response.choices:
+            text = choice.text
+            for line in PROMPT_LINES:
+                text = text.replace(line, "")
+            if text in convo:
+                continue
+            break
+        # text = ai_response.choices[0].text.replace(PROMPT, "")
+        # print(text)
+        text = text.replace("*", "\\*")
+        async with channel.typing():
+            if text:
+                await channel.send(text)
+            else:
+                await channel.send("what")
 
     def cog_unload(self):
         with open('db/rolestore.pickle', 'wb') as f:
